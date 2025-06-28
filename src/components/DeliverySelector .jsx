@@ -72,12 +72,13 @@ export function DeliverySelector() {
   };
 
   return (
-    <div className="border-b border-gray-200 px-6 py-3">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
+    <div className="border-b border-gray-200 px-4 py-3 lg:px-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between max-w-7xl mx-auto space-y-2 sm:space-y-0">
+        {/* Delivery / Pickup Dropdown */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex items-center text-sm text-gray-700 hover:text-gray-900"
+            className="flex items-center text-sm lg:text-base text-gray-700 hover:text-gray-900"
           >
             <span className="font-medium capitalize">{location.type}</span>
             <ChevronDown className="ml-1 w-4 h-4" />
@@ -117,22 +118,35 @@ export function DeliverySelector() {
           )}
         </div>
 
-        <div className="flex items-center space-x-2 text-gray-600">
-          <MapPin className="w-4 h-4" />
-          <span className="text-sm truncate max-w-xs">
+        {/* Location info */}
+        <div className="flex items-center space-x-2 text-gray-600 max-w-full truncate">
+          <MapPin className="w-4 h-4 flex-shrink-0" />
+          <span className="text-xs sm:text-sm truncate">
             <span className="font-medium capitalize">{location.type} to:</span>{" "}
-            {location.data || "No location selected"}
+            <span className="hidden sm:inline">
+  {typeof location.data === "string"
+    ? location.data
+    : "No location selected"}
+</span>
+
+            <span className="sm:hidden">
+              {(location.data && location.data.slice(0, 20) + "...") || "No location"}
+            </span>
           </span>
         </div>
 
-        <div className="flex space-x-2">
+        {/* Use My Location Button */}
+        <div className="flex">
           <Button
             variant="outline"
             size="sm"
             onClick={handleGetLocation}
             disabled={loadingLocation}
+            className="text-xs sm:text-sm"
           >
-            {loadingLocation ? "Locating..." : (
+            {loadingLocation ? (
+              "Locating..."
+            ) : (
               <>
                 <LocateFixed className="w-4 h-4 mr-1" />
                 Use My Location

@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
-import Menu from "./pages/Menu" // Placeholder for now
+import Menu from "./pages/Menuu" // Placeholder for now
 import Cart from "./pages/Cart"
 import Checkout from "./pages/Checkout"
 

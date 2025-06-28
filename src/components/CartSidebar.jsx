@@ -38,10 +38,11 @@ export function CartSidebar({
             <div className="space-y-4">
               {cartItems.map(item => {
                 const basePrice = item.selectedVariant?.price || item.price
-                const addOnsPrice = item.selectedAddOns.reduce(
-                  (sum, addon) => sum + addon.price,
-                  0
-                )
+                const addOnsPrice = (item.selectedAddOns || []).reduce(
+  (sum, addon) => sum + addon.price,
+  0
+);
+
                 const itemTotal = (basePrice + addOnsPrice) * item.quantity
 
                 return (

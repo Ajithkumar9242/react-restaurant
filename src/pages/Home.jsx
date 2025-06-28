@@ -10,25 +10,33 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLocationDetect = () => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const coords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        dispatch(setLocation({ type: 'geo', data: coords }));
-        navigate('/menu');
-      },
-      () => {
-        alert('Unable to retrieve your location');
+const handleLocationDetect = () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+        );
+        const data = await response.json();
+        const address = data.display_name;
+
+        dispatch(setLocation({ type: activeTab, data: address }));
+        navigate("/menu");
+      } catch (err) {
+        console.error("Error reverse geocoding:", err);
+        alert("Could not fetch address.");
       }
-    );
-  };
+    },
+    () => {
+      alert("Unable to retrieve your location");
+    }
+  );
+};
 
   const handleManualLocation = () => {
     if (manualLocation.trim() === '') return;
