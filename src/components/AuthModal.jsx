@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input"
 export function AuthModal({ isOpen, onClose, onAuthComplete }) {
   const [step, setStep] = useState(1) // 1: Details, 2: OTP
   const [userDetails, setUserDetails] = useState({ name: "", phone: "" })
-  const [otp, setOtp] = useState("")
+  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
+
   const [isVerifying, setIsVerifying] = useState(false)
 
   if (!isOpen) return null
@@ -25,7 +26,9 @@ export function AuthModal({ isOpen, onClose, onAuthComplete }) {
     // Simulate OTP verification
     await new Promise(resolve => setTimeout(resolve, 1500))
 
-    if (otp === "1234" || otp.length === 4) {
+const otp = otpDigits.join("");
+if (otp === "1234" || otp.length === 4) {
+
       // Accept any 4-digit OTP for demo
       onAuthComplete(userDetails)
       onClose()
@@ -73,15 +76,28 @@ export function AuthModal({ isOpen, onClose, onAuthComplete }) {
 
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder="WhatsApp Number"
-                    value={userDetails.phone}
-                    onChange={e =>
-                      setUserDetails({ ...userDetails, phone: e.target.value })
-                    }
-                    className="pl-10"
-                    maxLength={10}
-                  />
+                <Input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="WhatsApp Number"
+  value={userDetails.phone}
+  onChange={e =>
+    setUserDetails({
+      ...userDetails,
+      phone: e.target.value.replace(/\D/g, "")
+    })
+  }
+  onPaste={e => {
+    const pasted = e.clipboardData.getData("Text");
+    if (/\D/.test(pasted)) {
+      e.preventDefault();
+    }
+  }}
+  className="pl-10"
+  maxLength={10}
+/>
+
                 </div>
               </div>
 
@@ -106,15 +122,45 @@ export function AuthModal({ isOpen, onClose, onAuthComplete }) {
                 <p className="text-sm text-gray-500 mt-2">Use 1234 for demo</p>
               </div>
 
-              <Input
-                placeholder="Enter 4-digit OTP"
-                value={otp}
-                onChange={e =>
-                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 4))
-                }
-                className="text-center text-2xl tracking-widest"
-                maxLength={4}
-              />
+             <div className="flex justify-center gap-2">
+  {otpDigits.map((digit, index) => (
+    <input
+      key={index}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      value={digit}
+      onChange={(e) => {
+        const value = e.target.value.replace(/\D/g, "");
+        if (!value) return; // ignore non-numeric
+        const newDigits = [...otpDigits];
+        newDigits[index] = value;
+        setOtpDigits(newDigits);
+        // Focus next box
+        const next = document.getElementById(`otp-${index + 1}`);
+        if (next) next.focus();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          const newDigits = [...otpDigits];
+          if (otpDigits[index]) {
+            // Clear current box
+            newDigits[index] = "";
+            setOtpDigits(newDigits);
+          } else {
+            // Move focus back
+            const prev = document.getElementById(`otp-${index - 1}`);
+            if (prev) prev.focus();
+          }
+        }
+      }}
+      id={`otp-${index}`}
+      className="w-12 h-12 border border-gray-300 rounded text-center text-xl focus:outline-none focus:border-orange-500"
+    />
+  ))}
+</div>
+
 
               <div className="flex gap-3">
                 <Button
@@ -126,7 +172,8 @@ export function AuthModal({ isOpen, onClose, onAuthComplete }) {
                 </Button>
                 <Button
                   onClick={handleVerifyOtp}
-                  disabled={otp.length !== 4 || isVerifying}
+                  disabled={otpDigits.some(d => d === "") || isVerifying}
+
                   className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   {isVerifying ? "Verifying..." : "Verify"}

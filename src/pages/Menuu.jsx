@@ -3,6 +3,7 @@ import { useState, useMemo } from "react"
 import { Search, MapPin, ShoppingCart, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toast } from "react-hot-toast";
 
 import { ItemDetailsModal } from "../components/ItemDetailsModal"
 import { CartSidebar } from "../components/CartSidebar"
@@ -104,17 +105,18 @@ const handleAddToCart = (
   selectedAddOns = [],
   specialInstructions
 ) => {
-dispatch(
-  addItem({
-    foodItem: item, // Always wrap the food item here
-    quantity,
-    selectedVariant,
-    selectedAddOns,
-    specialInstructions
-  })
-)
+  dispatch(
+    addItem({
+      ...item,
+      quantity,
+      selectedVariant,
+      selectedAddOns,
+      specialInstructions
+    })
+  );
+  toast.success(`${item.name} added to cart`);
+};
 
-}
 
   const handleItemClick = item => {
     setSelectedItem(item)
@@ -141,10 +143,15 @@ const handleBackToHome = () => {
   status: "confirmed"
 }
 setOrderConfirmation(completeOrderDetails)
-    clearCart()
+    dispatch(clearCart())
+
     setShowOrderPage(false)
     setUserDetails(null)
-    alert(`Order placed successfully! Order ID: ${orderDetails.orderId}`)
+    // alert(`Order placed successfully! Order ID: ${orderDetails.orderId}`)
+    toast.success(`Order placed successfully! ID: ${orderDetails.orderId}`);
+
+    localStorage.removeItem("preparationInstructions");
+
   }
 
   const categories = [...new Set(foodItems.map(item => item.category))]
@@ -232,25 +239,28 @@ setOrderConfirmation(completeOrderDetails)
             </div>
 
             {/* Veg Only Toggle */}
-            <div className="flex items-center space-x-2">
-              <span className="text-xs lg:text-sm text-gray-700 hidden sm:block">
-                {/* <img src="/veg.png" alt="" srcset="" height={"10%"}/> */}
-              </span>
-              <button
-                onClick={() => setVegOnly(!vegOnly)}
-                className={`w-10 h-5 lg:w-12 lg:h-6 rounded-full transition-colors ${
-                  vegOnly ? "bg-green-500" : "bg-gray-300"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 lg:w-5 lg:h-5 bg-white rounded-full transition-transform ${
-                    vegOnly
-                      ? "translate-x-5 lg:translate-x-6"
-                      : "translate-x-0.5"
-                  }`}
-                />
-              </button>
-            </div>
+           <div className="flex items-center space-x-2">
+  <img
+    src="/veg.png"
+    alt="Veg"
+    className="w-5 h-5 lg:w-6 lg:h-6"
+  />
+  <button
+    onClick={() => setVegOnly(!vegOnly)}
+    className={`w-10 h-5 lg:w-12 lg:h-6 rounded-full transition-colors ${
+      vegOnly ? "bg-green-500" : "bg-gray-300"
+    }`}
+  >
+    <div
+      className={`w-4 h-4 lg:w-5 lg:h-5 bg-white rounded-full transition-transform ${
+        vegOnly
+          ? "translate-x-5 lg:translate-x-6"
+          : "translate-x-0.5"
+      }`}
+    />
+  </button>
+</div>
+
 
             {/* Cart Button */}
             <Button
